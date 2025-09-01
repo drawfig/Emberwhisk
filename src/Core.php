@@ -7,12 +7,6 @@ spl_autoload_register(function ($class_name) {
 });
 
 spl_autoload_register(function ($class_name) {
-    if(file_exists(__DIR__ . "/Handlers/" . str_replace("Handlers\\", "", $class_name) . ".php")) {
-        require_once (__DIR__ . "/Handlers/" . str_replace("Handlers\\", "", $class_name) . ".php");
-    }
-});
-
-spl_autoload_register(function ($class_name) {
 	include ($class_name . ".php");
 });
 
@@ -296,6 +290,7 @@ class Core {
 
 	protected function message_routing($data, $fd, $server) {
         $routing = $this->ROUTES[$data['message_type']];
+        include_once ("Handlers/" . $routing['class'] . ".php");
         $loaded_class = $routing['class'];
         $method = $routing['method'];
         $handler = new $loaded_class($this->SECRET);
@@ -388,7 +383,6 @@ class Core {
 	public function init($vals) {
 		$server = new Web_Sock($vals);
 		$this->ascii_out();
-        var_dump($this->ROUTES);
 		$server->start();
 	}
 }

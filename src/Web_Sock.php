@@ -29,7 +29,7 @@ class Web_Sock extends Core
 			'daemonize' => $this->convertBool($this->DAEMONIZATION)
 		]);
 
-		echo "Web Sock started.\n";
+		echo "Web Sock started on {$this->PROTOCOL}://{$this->ADDRESS}:{$this->PORT}\n";
 
 		$server->on('Open', function ($server, $frame) {
 			$fd = $frame->fd;
