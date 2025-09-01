@@ -18,11 +18,7 @@ class EnvBootstrap
 	private $ssl_key;
 	private $ssl_verify_peer;
 	private $ssl_allow_self_signed;
-	private $db_host;
-	private $db_port;
-	private $db_name;
-	private $db_username;
-	private $db_pass;
+    private $api_auth_address;
 	private $secret;
 
 	public function __construct($run_type) {
@@ -60,11 +56,7 @@ class EnvBootstrap
 		$this->ssl_key = $_ENV["SSL_KEY"];
 		$this->ssl_verify_peer = $_ENV["SSL_VERIFY_PEER"];
 		$this->ssl_allow_self_signed = $_ENV["SSL_ALLOW_SELF_SIGNED"];
-		$this->db_host = $_ENV["DB_HOST"];
-		$this->db_port = $_ENV["DB_PORT"];
-		$this->db_name = $_ENV["DB_NAME"];
-		$this->db_username = $_ENV["DB_USERNAME"];
-		$this->db_pass = $_ENV["DB_PASSWD"];
+		$this->api_auth_address = $_ENV["API_AUTH_ADDRESS"];
 		$this->secret = $_ENV["SECRET"];
 	}
 

@@ -24,12 +24,9 @@ class Core {
 	public $SSL_KEY;
 	public $SSL_VERIFY_PEER;
 	public $SSL_ALLOW_SELF_SIGNED;
-	public $DB_HOST;
-	public $DB_USERNAME;
-	public $DB_PASSWD;
-	public $DB_NAME;
-	public $DB_PORT;
 	public $SECRET;
+
+    public $API_AUTH_ADDRESS;
 
     public $ROUTES;
 
@@ -66,11 +63,7 @@ class Core {
 		$this->SSL_KEY = $EnvBoot->get_var("ssl_key");
 		$this->SSL_VERIFY_PEER = $EnvBoot->get_var("ssl_verify_peer");
 		$this->SSL_ALLOW_SELF_SIGNED = $EnvBoot->get_var("ssl_allow_self_signed");
-		$this->DB_HOST = $EnvBoot->get_var("db_host");
-		$this->DB_USERNAME = $EnvBoot->get_var("db_username");
-		$this->DB_PASSWD = $EnvBoot->get_var("db_password");
-		$this->DB_NAME = $EnvBoot->get_var("db_name");
-		$this->DB_PORT = $EnvBoot->get_var("db_port");
+		$this->API_AUTH_ADDRESS = $EnvBoot->get_var("api_auth_address");
 		$this->SECRET = $EnvBoot->get_var("secret");
 
         $this->init_routes();
@@ -228,58 +221,6 @@ class Core {
 		$db = null;
 	}
 
-    private function init_scoreboard_connection($server, $fd) {
-        $db = new Utils\Sqlite_Handler();
-
-        $query = "SELECT * FROM scoreboard_connection WHERE fd = :fd";
-        $vals_array = [
-            [
-                "name" => ":fd",
-                "value" => $fd,
-                "type" => "i"
-            ]
-        ];
-
-        $check = $db->make_query("select", $query, $vals_array);
-
-        if(sizeof($check) <= 0) {
-            $random_str = bin2hex(random_bytes(32));
-
-            $query = "INSERT INTO scoreboard_connection (fd, random_val) VALUES (:fd, :random_string)";
-
-            $vals_array = [
-                [
-                    "name" => ":fd",
-                    "value" => $fd,
-                    "type" => "i"
-                ],
-                [
-                    "name" => ":random_string",
-                    "value" => $random_str,
-                    "type" => "s"
-                ]
-            ];
-
-            $db->make_query("insert", $query, $vals_array);
-            $db = null;
-        }
-        else {
-            $random_str = $check[0]['random_val'];
-        }
-
-        $data = [
-            'random_key' => $random_str,
-        ];
-
-        $payload =[
-            'type' => "init_scoreboard",
-            'data' => $data,
-            'auth' => $this->auth_gen($data)
-        ];
-
-        $server->push($fd, json_encode($payload));
-    }
-
 	private function auth_gen($data) {
 		return hash('sha256', $this->SECRET . json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
 	}
@@ -289,16 +230,35 @@ class Core {
 	}
 
 	protected function message_routing($data, $fd, $server) {
+        switch ($data['message_type']) {
+            case "init_handshake":
+                $this->send_handshake($server, $fd);
+                break;
+            case "handshake":
+                $this->handle_handshake_resp($data['data'], $fd);
+                break;
+            default:
+                $this->handle_normal_routing($data, $fd, $server);
+        }
+	}
+
+    private function handle_normal_routing($data, $fd, $server) {
         $routing = $this->ROUTES[$data['message_type']];
+        $db = new Utils\Sqlite_Handler();
+        if($routing['protected']) {
+            $auth = new Utils\Authentication_System();
+            $auth->authenticate($fd, $data['auth'], $data['data'], $server, $db);
+        }
         include_once ("Handlers/" . $routing['class'] . ".php");
         $loaded_class = $routing['class'];
         $method = $routing['method'];
-        $handler = new $loaded_class($this->SECRET);
-        $handler->$method($data, $fd, $server);
-	}
+        $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db);
+        $handler->$method();
+        $db = null;
+    }
 
 	protected function get_user_api_key($user_id) {
-		$url = $this->API_PROTOCOL . '://' . $this->API_ADDRESS . '/auth_check';
+		$url = $this->API_PROTOCOL . '://' . $this->API_ADDRESS . '/' . $this->API_AUTH_ADDRESS;
 		$data = [
 			"user_id" => $user_id,
 		];
@@ -367,8 +327,6 @@ class Core {
 		$db->make_query("delete", $query, false);
 		$query = "DELETE FROM random_str_store";
 		$db->make_query("delete", $query, false);
-        $query = "DELETE FROM scoreboard_connection";
-        $db->make_query("delete", $query, false);
 		$db = null;
 
 		echo "Database Cleaned Up...\n";

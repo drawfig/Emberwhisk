@@ -11,12 +11,24 @@ spl_autoload_register(function ($class_name) {
 
 class test_handler {
     private $SECRET;
+    private $DATA;
+    private $FD;
+    private $SERVER;
+    private $DB;
 
-    public function __construct($secret) {
+    public function __construct($secret, $data, $fd, $server, $db) {
         $this->SECRET = $secret;
+        $this->DATA = $data;
+        $this->FD = $fd;
+        $this->SERVER = $server;
+        $this->DB = $db;
     }
 
     public function test_method() {
         print("it works chief \n");
+    }
+
+    public function test_secure_method() {
+        print("Wow much secure  \n");
     }
 }
