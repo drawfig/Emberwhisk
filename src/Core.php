@@ -216,6 +216,8 @@ class Core {
 			$this->add_connection($fd, $resp['data']['api_token'], $db);
 		}
 		else {
+            $logger = new Utils\Logging_system();
+            $logger->log("Connection Rejected to {$fd}", $data['user_id'], "Handshake Error");;
 			echo "Rejected Connection to {$fd} \n";
 		}
 		$db = null;
@@ -247,7 +249,7 @@ class Core {
         $db = new Utils\Sqlite_Handler();
         if($routing['protected']) {
             $auth = new Utils\Authentication_System();
-            $auth->authenticate($fd, $data['auth'], $data['data'], $server, $db);
+            $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);
         }
         include_once ("Handlers/" . $routing['class'] . ".php");
         $loaded_class = $routing['class'];

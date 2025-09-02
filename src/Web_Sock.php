@@ -30,6 +30,8 @@ class Web_Sock extends Core
 		]);
 
 		echo "Web Sock started on {$this->PROTOCOL}://{$this->ADDRESS}:{$this->PORT}\n";
+        $logger = new Utils\Logging_system();
+        $logger->log("Server Started", null, "system status");
 
 		$server->on('Open', function ($server, $frame) {
 			$fd = $frame->fd;

@@ -6,8 +6,7 @@ spl_autoload_register(function ($class_name) {
 });
 
 class Authentication_System {
-	public function authenticate($fd, $auth, $data, $server, $db) {
-
+	public function authenticate($fd, $user_id, $auth, $data, $server, $db) {
 		$query = "SELECT token FROM Connections WHERE FD = :fd";
 		$vals_array = [
 			[
@@ -25,6 +24,9 @@ class Authentication_System {
 		}
 		$server->push($fd, json_encode(["status" => false, "message" => "Unauthorized"]));
 		echo "Unauthorized Access \n";
-		die();
+        $logger = new Logging_system();
+        $logger->log("Unauthorized Access", $user_id, "Authentication Error");
+        $server->close($fd);
+        die();
 	}
 }

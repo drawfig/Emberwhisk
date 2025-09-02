@@ -19,6 +19,7 @@ class EnvBootstrap
 	private $ssl_verify_peer;
 	private $ssl_allow_self_signed;
     private $api_auth_address;
+    private $api_version;
 	private $secret;
 
 	public function __construct($run_type) {
@@ -57,6 +58,7 @@ class EnvBootstrap
 		$this->ssl_verify_peer = $_ENV["SSL_VERIFY_PEER"];
 		$this->ssl_allow_self_signed = $_ENV["SSL_ALLOW_SELF_SIGNED"];
 		$this->api_auth_address = $_ENV["API_AUTH_ADDRESS"];
+        $this->api_version = $_ENV["API_VERSION"];
 		$this->secret = $_ENV["SECRET"];
 	}
 

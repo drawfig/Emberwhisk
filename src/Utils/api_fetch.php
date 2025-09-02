@@ -11,15 +11,16 @@ class api_fetch
 	private $API_KEY;
 	private $API_PROTOCOL;
 	private $API_ADDRESS;
+    private $API_VERSION;
 
 	public function __construct($data, $action, $environment) {
 		$this->property_setter($environment);
 		$this->PAYLOAD = [
-			'user_id' => 0,
-			'api_version' => "25.07.19",
+			'user_id' => $data["user_id"],
+			'api_version' => $this->API_VERSION,
 			'action' => $action,
 			'data' => $data,
-			'auth' => $this->api_auth_gen($data)
+			'auth' => $data["auth"]
 		];
 	}
 
@@ -28,9 +29,10 @@ class api_fetch
 		$this->API_KEY = $prop_get->get_var("api_key");
 		$this->API_PROTOCOL = $prop_get->get_var("api_protocol");
 		$this->API_ADDRESS = $prop_get->get_var("api_address");
+        $this->API_VERSION = $prop_get->get_var("api_version");
 	}
 
-	private function api_auth_gen($data) {
+	private function api_auth_gen($data, $auth) {
 		return hash('sha256', $this->API_KEY . json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
 	}
 
