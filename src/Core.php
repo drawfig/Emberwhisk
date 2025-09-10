@@ -103,6 +103,17 @@ class Core {
 		$server->push($fd, json_encode($payload));
 	}
 
+    public function sqlite3_check() {
+        $out = system("php -m | grep sqlite3");
+
+        if($out = "") {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
 	private function ascii_out() {
 		print(
 			"                                                                                                                                                       
@@ -341,8 +352,14 @@ class Core {
     }
 
 	public function init($vals) {
-		$server = new Web_Sock($vals);
-		$this->ascii_out();
-		$server->start();
+        if(!$this->sqlite3_check()) {
+            $server = new Web_Sock($vals);
+            $this->ascii_out();
+            $server->start();
+        }
+        else {
+            print("\033[31mSQLite3 php module is missing and is required to run the Emberwhisk server.\n");
+            print("\033[0m");
+        }
 	}
 }
