@@ -1,0 +1,110 @@
+<?php
+
+namespace Utils;
+use PDO;
+
+spl_autoload_register(function ($class_name) {
+    include ($class_name . ".php");
+});
+
+class mysql_handler {
+    private $db_host;
+    private $db_port;
+    private $db_username;
+    private $db_password;
+    private $db_name;
+
+    private $mysql_run;
+
+    public function __construct($run_type, $mysql_active) {
+        if($mysql_active == "true") {
+            $this->init($run_type);
+        }
+    }
+
+    private function init($run_type) {
+        $property_provider = new EnvBootstrap($run_type);
+        $this->mysql_run = $property_provider->get_var("MYSQL_RUN");
+        $this->db_host = $property_provider->get_var("DB_HOST");
+        $this->db_port = $property_provider->get_var("DB_PORT");
+        $this->db_username = $property_provider->get_var("DB_USERNAME");
+        $this->db_password = $property_provider->get_var("DB_PASSWD");
+        $this->db_name = $property_provider->get_var("DB_NAME");
+    }
+
+    public function make_query($type, $query, $var_array) {
+        $log = new Logging_system();
+        if($this->mysql_run == "true") {
+            try {
+                $db = new \PDO("mysql:host={$this->db_host};port={$this->db_port};dbname=" . $this->db_name, $this->db_username, $this->db_password);
+                switch ($type) {
+                    case "insert":
+                        $output = $this->insert_query($query, $var_array, $db);
+                        break;
+                    case "delete":
+                        $output = $this->delete_query($query, $var_array, $db);
+                        break;
+                    case "select":
+                    default:
+                        $output = $this->basic_query($query, $var_array, $db);
+                }
+                $db = null;
+                return $output;
+            } catch (\PDOException $e) {
+                $log->log("Failed to connect to database", null, "error");
+                $db = null;
+                return false;
+            }
+        }
+        else {
+            $log->log("Mysql module has been disabled, if you want to use mysql with your server please update your config.", null, "Warning");
+            return [];
+        }
+    }
+    private function insert_query($query, $val_array, $db) {
+        $ready_query = $db->prepare($query);
+        foreach($val_array as $val) {
+            $ready_query->bindeValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
+        }
+
+        $ready_query->execute();
+        return $db->lastInsertId();
+    }
+
+    private function basic_query($query, $val_array, $db) {
+        $ready_query = $db->prepare($query);
+        if($val_array) {
+            foreach ($val_array as $val) {
+                $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
+            }
+        }
+        $output = [];
+        $run_query = $ready_query->execute();
+        while ($res = $run_query->fetchArray(PDO::FETCH_ASSOC)) {
+            $output[] = $res;
+        }
+        return $output;
+    }
+
+    private function delete_query($query, $val_array, $db) {
+        $ready_query = $db->prepare($query);
+        if($val_array) {
+            foreach ($val_array as $val) {
+                $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
+            }
+        }
+        $ready_query->execute();
+        return true;
+    }
+
+    private function pdo_type_sort($type) {
+        switch ($type) {
+            case "i":
+                return \PDO::PARAM_INT;
+            case "s":
+                return \PDO::PARAM_STR;
+            case "b":
+                return \PDO::PARAM_BOOL;
+        }
+    }
+}

@@ -21,6 +21,13 @@ class EnvBootstrap
     private $api_auth_address;
     private $api_version;
 	private $secret;
+    private $db_host;
+    private $db_port;
+    private $db_username;
+    private $db_password;
+    private $db_name;
+
+    private $mysql_run;
 
 	public function __construct($run_type) {
 		$this->setEnvironment($run_type);
@@ -60,7 +67,21 @@ class EnvBootstrap
 		$this->api_auth_address = $_ENV["API_AUTH_ADDRESS"];
         $this->api_version = $_ENV["API_VERSION"];
 		$this->secret = $_ENV["SECRET"];
+        $this->mysql_run = $_ENV["MYSQL_RUN"];
+        if($this->mysql_run == "true") {
+            $this->init_db_config();
+        }
 	}
+
+    private function init_db_config() {
+        $dotenv = \Dotenv\Dotenv::createImmutable(realpath(__DIR__ . "/../"), ".env.db_config");
+        $dotenv->load();
+        $this->db_host = $_ENV["DB_HOST"];
+        $this->db_port = $_ENV["DB_PORT"];
+        $this->db_username = $_ENV["DB_USERNAME"];
+        $this->db_password = $_ENV["DB_PASSWD"];
+        $this->db_name = $_ENV["DB_NAME"];
+    }
 
 	public function get_var($var_key) {
 		if(isset($this->$var_key)) {
