@@ -16,25 +16,25 @@ class mysql_handler {
 
     private $mysql_run;
 
-    public function __construct($run_type, $mysql_active) {
-        if($mysql_active == "true") {
-            $this->init($run_type);
-        }
+    public function __construct($run_type) {
+        $this->init($run_type);
     }
 
     private function init($run_type) {
         $property_provider = new EnvBootstrap($run_type);
-        $this->mysql_run = $property_provider->get_var("MYSQL_RUN");
-        $this->db_host = $property_provider->get_var("DB_HOST");
-        $this->db_port = $property_provider->get_var("DB_PORT");
-        $this->db_username = $property_provider->get_var("DB_USERNAME");
-        $this->db_password = $property_provider->get_var("DB_PASSWD");
-        $this->db_name = $property_provider->get_var("DB_NAME");
+        $this->mysql_run = $property_provider->get_var("mysql_run");
+        if($this->mysql_run) {
+            $this->db_host = $property_provider->get_var("db_host");
+            $this->db_port = $property_provider->get_var("db_port");
+            $this->db_username = $property_provider->get_var("db_username");;
+            $this->db_password = $property_provider->get_var("db_password");
+            $this->db_name = $property_provider->get_var("db_name");
+        }
     }
 
     public function make_query($type, $query, $var_array) {
         $log = new Logging_system();
-        if($this->mysql_run == "true") {
+        if($this->mysql_run) {
             try {
                 $db = new \PDO("mysql:host={$this->db_host};port={$this->db_port};dbname=" . $this->db_name, $this->db_username, $this->db_password);
                 switch ($type) {
@@ -78,11 +78,8 @@ class mysql_handler {
                 $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
             }
         }
-        $output = [];
-        $run_query = $ready_query->execute();
-        while ($res = $run_query->fetchArray(PDO::FETCH_ASSOC)) {
-            $output[] = $res;
-        }
+        $ready_query->execute();
+        $output = $ready_query->fetchAll(\PDO::FETCH_ASSOC);
         return $output;
     }
 
