@@ -26,7 +26,7 @@ class default_handler {
     }
 
     public function bounce() {
-        print("Boing!");
+        print("Boing!\n");
         $this->SERVER->push($this->FD, json_encode($this->DATA));
     }
 }
