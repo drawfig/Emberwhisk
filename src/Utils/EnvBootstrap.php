@@ -28,6 +28,7 @@ class EnvBootstrap
     private $db_name;
 
     private $mysql_run;
+    private $run_type;
 
 	public function __construct($run_type) {
 		$this->setEnvironment($run_type);
@@ -46,6 +47,7 @@ class EnvBootstrap
 					break;
 			}
 		}
+        $this->run_type = $this->env;
 	}
 
 	private function init() {

@@ -16,7 +16,7 @@ spl_autoload_register(function ($class_name) {
     include ($class_name . ".php");
 });
 
-class default_handler {
+class connection_handler {
     private $SECRET;
     private $DATA;
     private $FD;
@@ -24,7 +24,8 @@ class default_handler {
     private $DB;
     private $RUN_TYPE;
 
-    public function __construct($secret, $data, $fd, $server, $db, $run_type) {
+    public function __construct($secret, $data, $fd, $server, $db, $run_type)
+    {
         $this->SECRET = $secret;
         $this->DATA = $data;
         $this->FD = $fd;
@@ -33,9 +34,10 @@ class default_handler {
         $this->RUN_TYPE = $run_type;
     }
 
-    public function bounce() {
-        $agent = new Agents\default_agent();
-        print($agent->bounce_txt());
-        $this->SERVER->push($this->FD, json_encode($this->DATA));
+    public function run() {
+        $this->connection_alert();
+    }
+    private function connection_alert() {
+        print("New connection: {$this->FD}\n");
     }
 }

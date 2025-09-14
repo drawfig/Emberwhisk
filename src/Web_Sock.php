@@ -35,7 +35,7 @@ class Web_Sock extends Core
 
 		$server->on('Open', function ($server, $frame) {
 			$fd = $frame->fd;
-			echo "New connection: {$fd}\n";
+			$this->on_connection($fd, $server);
 		});
 
 		$server->on('Message', function ($server, $frame) {

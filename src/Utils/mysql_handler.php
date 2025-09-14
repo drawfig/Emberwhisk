@@ -15,6 +15,7 @@ class mysql_handler {
     private $db_name;
 
     private $mysql_run;
+    private $db;
 
     public function __construct($run_type) {
         $this->init($run_type);
@@ -36,17 +37,17 @@ class mysql_handler {
         $log = new Logging_system();
         if($this->mysql_run) {
             try {
-                $db = new \PDO("mysql:host={$this->db_host};port={$this->db_port};dbname=" . $this->db_name, $this->db_username, $this->db_password);
+                $this->db = new \PDO("mysql:host={$this->db_host};port={$this->db_port};dbname=" . $this->db_name, $this->db_username, $this->db_password);
                 switch ($type) {
                     case "insert":
-                        $output = $this->insert_query($query, $var_array, $db);
+                        $output = $this->insert_query($query, $var_array);
                         break;
                     case "delete":
-                        $output = $this->delete_query($query, $var_array, $db);
+                        $output = $this->delete_query($query, $var_array);
                         break;
                     case "select":
                     default:
-                        $output = $this->basic_query($query, $var_array, $db);
+                        $output = $this->basic_query($query, $var_array);
                 }
                 $db = null;
                 return $output;
@@ -61,18 +62,18 @@ class mysql_handler {
             return [];
         }
     }
-    private function insert_query($query, $val_array, $db) {
-        $ready_query = $db->prepare($query);
+    private function insert_query($query, $val_array) {
+        $ready_query = $this->db->prepare($query);
         foreach($val_array as $val) {
             $ready_query->bindeValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
         }
 
         $ready_query->execute();
-        return $db->lastInsertId();
+        return $this->db->lastInsertId();
     }
 
-    private function basic_query($query, $val_array, $db) {
-        $ready_query = $db->prepare($query);
+    private function basic_query($query, $val_array) {
+        $ready_query = $this->db->prepare($query);
         if($val_array) {
             foreach ($val_array as $val) {
                 $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
@@ -83,8 +84,8 @@ class mysql_handler {
         return $output;
     }
 
-    private function delete_query($query, $val_array, $db) {
-        $ready_query = $db->prepare($query);
+    private function delete_query($query, $val_array) {
+        $ready_query = $this->db->prepare($query);
         if($val_array) {
             foreach ($val_array as $val) {
                 $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
@@ -103,5 +104,9 @@ class mysql_handler {
             case "b":
                 return \PDO::PARAM_BOOL;
         }
+    }
+
+    public function __destruct() {
+        $this->DB = null;
     }
 }

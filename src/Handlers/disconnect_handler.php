@@ -1,5 +1,4 @@
 <?php
-namespace Handlers;
 spl_autoload_register(function ($class_name) {
     if(file_exists(__DIR__ . "/Utils/" . str_replace("Utils\\", "", $class_name) . ".php")) {
         require_once (__DIR__ . "/Utils/" . str_replace("Utils\\", "", $class_name) . ".php");
@@ -16,7 +15,7 @@ spl_autoload_register(function ($class_name) {
     include ($class_name . ".php");
 });
 
-class default_handler {
+class disconnect_handler {
     private $SECRET;
     private $DATA;
     private $FD;
@@ -24,7 +23,8 @@ class default_handler {
     private $DB;
     private $RUN_TYPE;
 
-    public function __construct($secret, $data, $fd, $server, $db, $run_type) {
+    public function __construct($secret, $data, $fd, $server, $db, $run_type)
+    {
         $this->SECRET = $secret;
         $this->DATA = $data;
         $this->FD = $fd;
@@ -33,9 +33,27 @@ class default_handler {
         $this->RUN_TYPE = $run_type;
     }
 
-    public function bounce() {
-        $agent = new Agents\default_agent();
-        print($agent->bounce_txt());
-        $this->SERVER->push($this->FD, json_encode($this->DATA));
+    public function run() {
+        $this->remove_connection($this->FD);
+        $this->disconnection_alert();
+    }
+    private function disconnection_alert() {
+        print("Connection closed: {$this->FD}\n");
+    }
+
+    private function remove_connection($fd) {
+        $db = new Utils\Sqlite_Handler();
+
+        $query = "DELETE FROM Connections WHERE FD = :fd";
+        $vals_array = [
+            [
+                "name" => ":fd",
+                "value" => $fd,
+                "type" => "i"
+            ]
+        ];
+
+        $db->make_query("delete", $query, $vals_array);
+        $db = null;
     }
 }

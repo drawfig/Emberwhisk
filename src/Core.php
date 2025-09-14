@@ -1,5 +1,7 @@
 <?php
 
+use Handlers\connection_handler;
+
 spl_autoload_register(function ($class_name) {
 	if(file_exists(__DIR__ . "/Utils/" . str_replace("Utils\\", "", $class_name) . ".php")) {
 		require_once (__DIR__ . "/Utils/" . str_replace("Utils\\", "", $class_name) . ".php");
@@ -7,10 +9,17 @@ spl_autoload_register(function ($class_name) {
 });
 
 spl_autoload_register(function ($class_name) {
+    if(file_exists(__DIR__ . "/Agents/" . str_replace("Agents\\", "", $class_name) . ".php")) {
+        require_once (__DIR__ . "/Agents/" . str_replace("Agents\\", "", $class_name) . ".php");
+    }
+});
+
+spl_autoload_register(function ($class_name) {
 	include ($class_name . ".php");
 });
 
 class Core {
+    public $RUN_TYPE;
 	public $ADDRESS;
 	public $PORT;
 	public $PROTOCOL;
@@ -65,6 +74,7 @@ class Core {
 		$this->SSL_ALLOW_SELF_SIGNED = $EnvBoot->get_var("ssl_allow_self_signed");
 		$this->API_AUTH_ADDRESS = $EnvBoot->get_var("api_auth_address");
 		$this->SECRET = $EnvBoot->get_var("secret");
+        $this->RUN_TYPE = $EnvBoot->get_var("run_type");
 
         $this->init_routes();
 	}
@@ -265,8 +275,24 @@ class Core {
         include_once ("Handlers/" . $routing['class'] . ".php");
         $loaded_class = $routing['class'];
         $method = $routing['method'];
-        $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db);
+        $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
         $handler->$method();
+        $db = null;
+    }
+
+    protected function on_connection($fd, $server) {
+        $db = new Utils\Sqlite_Handler();
+        include_once("Handlers/connection_handler.php");
+        $handler = new connection_handler($this->SECRET,[], $fd, $server, $db, $this->RUN_TYPE);
+        $handler->run();
+        $db = null;
+    }
+
+    protected function on_disconnect($fd, $server) {
+        $db = new Utils\Sqlite_Handler();
+        include_once("Handlers/disconnect_handler.php");
+        $handler = new disconnect_handler($this->SECRET,[], $fd, $server, $db, $this->RUN_TYPE);
+        $handler->run();
         $db = null;
     }
 
@@ -315,22 +341,6 @@ class Core {
 
 		$db->make_query("insert", $query, $vals_array);
 		return true;
-	}
-
-	protected function remove_connection($fd) {
-		$db = new Utils\Sqlite_Handler();
-
-		$query = "DELETE FROM Connections WHERE FD = :fd";
-		$vals_array = [
-			[
-				"name" => ":fd",
-				"value" => $fd,
-				"type" => "i"
-			]
-		];
-
-		$db->make_query("delete", $query, $vals_array);
-		$db = null;
 	}
 
 	protected function initilization() {
