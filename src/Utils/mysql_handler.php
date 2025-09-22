@@ -45,11 +45,13 @@ class mysql_handler {
                     case "delete":
                         $output = $this->delete_query($query, $var_array);
                         break;
+                    case "update":
+                        $output = $this->update_query($query, $var_array);
+                        break;
                     case "select":
                     default:
                         $output = $this->basic_query($query, $var_array);
                 }
-                $db = null;
                 return $output;
             } catch (\PDOException $e) {
                 $log->log("Failed to connect to database", null, "error");
@@ -86,6 +88,18 @@ class mysql_handler {
 
     private function delete_query($query, $val_array) {
         $ready_query = $this->db->prepare($query);
+        if($val_array) {
+            foreach ($val_array as $val) {
+                $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
+            }
+        }
+        $ready_query->execute();
+        return true;
+    }
+
+    private function update_query($query, $val_array)
+    {
+        $ready_query = $this->DB->prepare($query);
         if($val_array) {
             foreach ($val_array as $val) {
                 $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));

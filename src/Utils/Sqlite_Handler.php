@@ -16,6 +16,8 @@ class Sqlite_Handler {
 				return $this->insert_query($query, $val_array);
 			case "delete":
 				return $this->delete_query($query, $val_array);
+            case "update":
+                return $this->update_query($query, $val_array);
 			case "select":
 			default:
 				return $this->basic_query($query, $val_array);
@@ -59,6 +61,17 @@ class Sqlite_Handler {
 		$ready_query->execute();
 		return true;
 	}
+
+    private function update_query($query, $val_array) {
+        $ready_query = $this->DB->prepare($query);
+        if($val_array) {
+            foreach ($val_array as $val) {
+                $ready_query->bindValue($val["name"], $val["value"], $this->pdo_type_sort($val["type"]));
+            }
+        }
+        $ready_query->execute();
+        return true;
+    }
 
 	private function pdo_type_sort($type) {
 		switch ($type) {
