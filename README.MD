@@ -13,6 +13,8 @@ Here's how we handle the heavy lifting:
 
 To further accelerate your workflow, Emberwhisk is paired with [WAND](https://github.com/drawfig/WAND), a development toolkit. WAND provides a rich command-line interface for debugging and managing your server without ever leaving your terminal.
 
+Join us on our [Discord server.](https://discord.gg/gtwuf2A4Hq)
+
 ## How to install Emberwhisk
 
 It is **highly recommended** to use the [**WAND**](https://github.com/drawfig/WAND) development tool for installation. WAND allows you to easily install, configure, and run the Emberwhisk server in a development environment while also offering other tools for working with the framework.
@@ -58,11 +60,12 @@ However, if you prefer to install the Emberwhisk framework directly, you must fi
 Emberwhisk is an open-source project, and we welcome contributions from the community! If you'd like to get involved, here are a few ways you can help:
 - **Report Bugs:** If you find a bug or an issue, please open an issue on the GitHub repository.
 - **Submit Code:** Have an idea for a new feature or a bug fix? Feel free to fork the repository and submit a pull request.
-- **Get in Touch:** For general questions, feature discussions, or to just chat about the project, you can contact me on Discord at `drawfig`.
+- **Get in Touch:** For general questions, feature discussions, or to just chat about the project, you can contact me on Discord at `drawfig` or by joining [our server.](https://discord.gg/gtwuf2A4Hq).
 
 Your contributions are greatly appreciated and help make Emberwhisk better for everyone.
 
 ## License
 Emberwhisk is open-source software licensed under the GNU General Public License v3.0 (GPL-3.0). A copy of the license is included in the root directory of this project.
+
 
 
