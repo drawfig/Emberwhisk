@@ -51,3 +51,15 @@ However, if you prefer to install the Emberwhisk framework directly, you must fi
     ```
     > **Note:** The optional argument at the end (`dev` in this case) determines which environment the server starts in, using the corresponding `.env` file. If left empty, the server will default to the `local` environment.
 
+## How to Contribute
+
+Emberwhisk is an open-source project, and we welcome contributions from the community! If you'd like to get involved, here are a few ways you can help:
+- **Report Bugs:** If you find a bug or an issue, please open an issue on the GitHub repository.
+- **Submit Code:** Have an idea for a new feature or a bug fix? Feel free to fork the repository and submit a pull request.
+- **Get in Touch:** For general questions, feature discussions, or to just chat about the project, you can contact me on Discord at `drawfig`.
+
+Your contributions are greatly appreciated and help make Emberwhisk better for everyone.
+
+## License
+Emberwhisk is open-source software licensed under the GNU General Public License v3.0 (GPL-3.0). A copy of the license is included in the root directory of this project.
+
