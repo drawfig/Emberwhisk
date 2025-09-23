@@ -28,7 +28,7 @@ However, if you prefer to install the Emberwhisk framework directly, you must fi
 
 1.  **Clone the repository:**
     ```
-    git clone [https://github.com/drawfig/Emberwhisk.git](https://github.com/drawfig/Emberwhisk.git)
+    git clone https://github.com/drawfig/Emberwhisk.git
     ```
 
 2.  **Install dependencies with Composer:**
@@ -50,3 +50,4 @@ However, if you prefer to install the Emberwhisk framework directly, you must fi
     php run.php dev
     ```
     > **Note:** The optional argument at the end (`dev` in this case) determines which environment the server starts in, using the corresponding `.env` file. If left empty, the server will default to the `local` environment.
+
