@@ -9,4 +9,44 @@ Here's how we handle the heavy lifting:
 
 - Built-in Error Handling: We provide a stable, opinionated system for catching and handling exceptions, ensuring your server remains reliable under pressure.
 
-To further accelerate your workflow, Emberwhisk is paired with WAND, a development toolkit. WAND provides a rich command-line interface for debugging and managing your server without ever leaving your terminal.
+To further accelerate your workflow, Emberwhisk is paired with [WAND](https://github.com/drawfig/WAND), a development toolkit. WAND provides a rich command-line interface for debugging and managing your server without ever leaving your terminal.
+
+## How to install Emberwhisk
+
+It is **highly recommended** to use the [**WAND**](https://github.com/drawfig/WAND) development tool for installation. WAND allows you to easily install, configure, and run the Emberwhisk server in a development environment while also offering other tools for working with the framework.
+
+However, if you prefer to install the Emberwhisk framework directly, you must first have the following dependencies installed:
+
+* **PHP:** `cli`, `dev` and `PEAR/PECL` packages
+* **OpenSwoole**
+* **PHP:** `sqlite` and `PDO` modules
+* **Composer**
+
+---
+
+### Manual Installation
+
+1.  **Clone the repository:**
+    ```
+    git clone [https://github.com/drawfig/Emberwhisk.git](https://github.com/drawfig/Emberwhisk.git)
+    ```
+
+2.  **Install dependencies with Composer:**
+    ```
+    cd Emberwhisk
+    composer install
+    ```
+
+3.  **Create your configuration file:**
+    > Move into the `src` directory and use the `dotenv.example` file to create a configuration for your environment. For example, to create a configuration for the development environment:
+    ```
+    cd src
+    cp dotenv.example .env.dev
+    ```
+    Then, open the new `.env.dev` file in a text editor to add your server's configuration settings.
+
+4.  **Start the server:**
+    ```
+    php run.php dev
+    ```
+    > **Note:** The optional argument at the end (`dev` in this case) determines which environment the server starts in, using the corresponding `.env` file. If left empty, the server will default to the `local` environment.
