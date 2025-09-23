@@ -43,8 +43,7 @@ class Web_Sock extends Core
 		});
 
 		$server->on('Close', function ($server, $fd) {
-			$this->remove_connection($fd);
-			echo "Connection closed: {$fd}\n";
+			$this->on_disconnect( $fd, $server);
 		});
 
 		$server->start();

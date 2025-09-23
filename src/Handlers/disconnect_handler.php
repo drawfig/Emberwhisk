@@ -43,8 +43,7 @@ class disconnect_handler {
 
     private function remove_connection($fd) {
         $db = new Utils\Sqlite_Handler();
-
-        $query = "DELETE FROM Connections WHERE FD = :fd";
+        $query = "SELECT * FROM Connections WHERE FD = :fd";
         $vals_array = [
             [
                 "name" => ":fd",
@@ -52,8 +51,13 @@ class disconnect_handler {
                 "type" => "i"
             ]
         ];
+        $resp = $db->make_query("select", $query, $vals_array);
 
-        $db->make_query("delete", $query, $vals_array);
+        if($resp) {
+            $query = "DELETE FROM Connections WHERE FD = :fd";
+
+            $db->make_query("delete", $query, $vals_array);
+        }
         $db = null;
     }
 }
