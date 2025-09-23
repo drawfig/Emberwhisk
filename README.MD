@@ -1,3 +1,5 @@
+# Emberwhisk
+
 ## About Emberwhisk
 Emberwhisk is a robust PHP and OpenSwoole framework designed to streamline the development of high-performance WebSocket applications. It's built on a simple philosophy: eliminate the tedious boilerplate so you can focus on your application's unique logic. With Emberwhisk, you can build powerful, real-time applications faster and with less effort.
 
@@ -62,4 +64,5 @@ Your contributions are greatly appreciated and help make Emberwhisk better for e
 
 ## License
 Emberwhisk is open-source software licensed under the GNU General Public License v3.0 (GPL-3.0). A copy of the license is included in the root directory of this project.
+
 
