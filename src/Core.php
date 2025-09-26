@@ -268,17 +268,19 @@ class Core {
 	}
 
     private function handle_normal_routing($data, $fd, $server) {
-        $routing = $this->ROUTES[$data['message_type']];
-        $db = new Utils\Sqlite_Handler();
-        if($routing['protected']) {
-            $auth = new Utils\Authentication_System();
-            $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);
+        if(array_key_exists($data['message_type'], $this->ROUTES)) {
+            $routing = $this->ROUTES[$data['message_type']];
+            $db = new Utils\Sqlite_Handler();
+            if ($routing['protected']) {
+                $auth = new Utils\Authentication_System();
+                $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);
+            }
+            include_once("Handlers/" . $routing['class'] . ".php");
+            $loaded_class = $routing['class'];
+            $method = $routing['method'];
+            $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
+            $handler->$method();
         }
-        include_once ("Handlers/" . $routing['class'] . ".php");
-        $loaded_class = $routing['class'];
-        $method = $routing['method'];
-        $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
-        $handler->$method();
         $db = null;
     }
 
