@@ -15,6 +15,12 @@ spl_autoload_register(function ($class_name) {
 });
 
 spl_autoload_register(function ($class_name) {
+    if(file_exists(__DIR__ . "/Middleware/" . str_replace("Middleware\\", "", $class_name) . ".php")) {
+        require_once (__DIR__ . "/Middleware/" . str_replace("Middleware\\", "", $class_name) . ".php");
+    }
+});
+
+spl_autoload_register(function ($class_name) {
 	include ($class_name . ".php");
 });
 
@@ -210,8 +216,8 @@ class Core {
                                      &&&::::::&::::::::::::::+::::::x&&&&&x:::::::::::::::::::x$;:::::;&::::::::::X&                                   
                                      &&:::::+&::::::::::::::::x::::::&&&&&::::::::::::::::::::::::;x$$;::::::::::::$&                                  
                                      =================================EMBERWHISK PROJECT=============================
-                                     |                                 v0.0.1-alpha.1                               |
-                                     |                                   Astute Fox                                 |
+                                     |                                 v0.0.2-alpha2                                |
+                                     |                                 Bewitched Fox                                |
                                      |                                      2025                                    |
                                      ================================================================================                                 \n"
 		);
@@ -267,9 +273,15 @@ class Core {
         }
 	}
 
+    private function run_middleware($data, $fd, $server) {
+        $grouping = new Middleware\Middleware_Manager();
+        $grouping->run($data, $fd, $server);
+    }
+
     private function handle_normal_routing($data, $fd, $server) {
         if(array_key_exists($data['message_type'], $this->ROUTES)) {
             $routing = $this->ROUTES[$data['message_type']];
+            $this->run_middleware($data, $fd, $server);
             $db = new Utils\Sqlite_Handler();
             if ($routing['protected']) {
                 $auth = new Utils\Authentication_System();
