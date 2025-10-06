@@ -275,23 +275,37 @@ class Core {
 
     private function run_middleware($data, $fd, $server) {
         $grouping = new Middleware\Middleware_Manager();
-        $grouping->run($data, $fd, $server);
+        $run_chk = $grouping->run($data, $fd, $server, $this->RUN_TYPE);
+
+        if($run_chk === true) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     private function handle_normal_routing($data, $fd, $server) {
         if(array_key_exists($data['message_type'], $this->ROUTES)) {
             $routing = $this->ROUTES[$data['message_type']];
-            $this->run_middleware($data, $fd, $server);
+            $middleware_resp = $this->run_middleware($data, $fd, $server);
             $db = new Utils\Sqlite_Handler();
-            if ($routing['protected']) {
-                $auth = new Utils\Authentication_System();
-                $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);
+            if($middleware_resp) {
+                if ($routing['protected']) {
+                    $auth = new Utils\Authentication_System();
+                    $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);
+                }
+                include_once("Handlers/" . $routing['class'] . ".php");
+                $loaded_class = $routing['class'];
+                $method = $routing['method'];
+                $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
+                $handler->$method();
             }
-            include_once("Handlers/" . $routing['class'] . ".php");
-            $loaded_class = $routing['class'];
-            $method = $routing['method'];
-            $handler = new $loaded_class($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
-            $handler->$method();
+            else {
+                include_once("Handlers/middleware_rejection_handler.php");
+                $handler = new middleware_rejection_handler($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
+                $handler->run();
+            }
         }
         $db = null;
     }

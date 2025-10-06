@@ -3,7 +3,8 @@ namespace Middleware;
 
 class Middleware_Software_Groups {
     public $GLOBAL_MIDDLEWARE = [
-        "Rate_Limiter"
+        "Rate_Limiter",
+        "User_Filter",
     ];
 
     public $REGIONAL_MIDDLEWARE = [
