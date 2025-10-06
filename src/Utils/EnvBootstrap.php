@@ -26,7 +26,8 @@ class EnvBootstrap
     private $db_username;
     private $db_password;
     private $db_name;
-
+    private $time_buffer;
+    private $rate_limit;
     private $mysql_run;
     private $run_type;
 
@@ -64,6 +65,8 @@ class EnvBootstrap
 		$this->worker_count = $_ENV["WORKER_COUNT"];
 		$this->ssl_cert = $_ENV["SSL_CERT"];
 		$this->ssl_key = $_ENV["SSL_KEY"];
+        $this->time_buffer = $_ENV["TIME_BUFFER"];
+        $this->rate_limit = $_ENV["RATE_LIMIT"];
 		$this->ssl_verify_peer = $_ENV["SSL_VERIFY_PEER"];
 		$this->ssl_allow_self_signed = $_ENV["SSL_ALLOW_SELF_SIGNED"];
 		$this->api_auth_address = $_ENV["API_AUTH_ADDRESS"];
