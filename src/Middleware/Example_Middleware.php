@@ -12,7 +12,7 @@ spl_autoload_register(function ($class_name) {
 });
 
 class Example_Middleware {
-    public function run($data, $server, $db) {
+    public function run($data, $server, $db, $routing) {
         print("Example Middleware\n");
     }
 }

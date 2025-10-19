@@ -21,7 +21,7 @@ class Rate_Limiter {
         $this->RATE_LIMIT = $ENV_BOOTSTRAP->get_var("rate_limit");
     }
 
-    public function run($data, $server, $fd) {
+    public function run($data, $server, $fd, $routing) {
         $out_chk = $this->check_rate($data, $server, $fd);
         if($out_chk) {
             return true;

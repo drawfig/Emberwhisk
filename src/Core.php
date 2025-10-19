@@ -216,8 +216,8 @@ class Core {
                                      &&&::::::&::::::::::::::+::::::x&&&&&x:::::::::::::::::::x$;:::::;&::::::::::X&                                   
                                      &&:::::+&::::::::::::::::x::::::&&&&&::::::::::::::::::::::::;x$$;::::::::::::$&                                  
                                      =================================EMBERWHISK PROJECT=============================
-                                     |                                 v0.0.2-alpha2                                |
-                                     |                                 Bewitched Fox                                |
+                                     |                                 v0.0.3-alpha3                                |
+                                     |                                 Celestial Fox                                |
                                      |                                      2025                                    |
                                      ================================================================================                                 \n"
 		);
@@ -273,24 +273,24 @@ class Core {
         }
 	}
 
-    private function run_middleware($data, $fd, $server) {
+    private function run_middleware($data, $fd, $server, $routing) {
         $grouping = new Middleware\Middleware_Manager();
-        $run_chk = $grouping->run($data, $fd, $server, $this->RUN_TYPE);
-
-        if($run_chk === true) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return $grouping->run($data, $fd, $server, $this->RUN_TYPE, $routing);
     }
 
     private function handle_normal_routing($data, $fd, $server) {
         if(array_key_exists($data['message_type'], $this->ROUTES)) {
             $routing = $this->ROUTES[$data['message_type']];
-            $middleware_resp = $this->run_middleware($data, $fd, $server);
+            $middleware_resp = $this->run_middleware($data, $fd, $server, $routing);
+            if(is_array($middleware_resp) && array_key_exists('data', $middleware_resp)) {
+                $data = $middleware_resp['data'];
+                $middleware_run = $middleware_resp['status'];
+            }
+            else {
+                $middleware_run = $middleware_resp;
+            }
             $db = new Utils\Sqlite_Handler();
-            if($middleware_resp) {
+            if($middleware_run) {
                 if ($routing['protected']) {
                     $auth = new Utils\Authentication_System();
                     $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);

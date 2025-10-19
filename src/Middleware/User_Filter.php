@@ -26,7 +26,7 @@ class User_Filter
         $ENV_BOOTSTRAP = new \Utils\EnvBootstrap($run_type);
     }
 
-    public function run($data, $server, $fd)
+    public function run($data, $server, $fd, $routing)
     {
         $user_ip = $server->getClientInfo($fd)['remote_ip'];
         $whitelist_used = $this->check_for_white_list($data['message_type']);
