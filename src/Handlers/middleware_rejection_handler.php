@@ -37,8 +37,19 @@ class middleware_rejection_handler
 
     public function run()
     {
+        $error_data = $this->DATA['data'];
         $this->log_reject();
-        $this->kill_connection();
+        $send_data = [
+            "api_status" => true,
+            "api_success" => false,
+            "message_type" => "error",
+            "error_code" => $error_data['status'],
+            "error_message" => $error_data['message'],
+        ];
+        $this->SERVER->send($this->FD, json_encode($send_data));
+        if($error_data['kill']) {
+            $this->kill_connection();
+        }
     }
 
     private function log_reject()  {
