@@ -33,6 +33,7 @@ class Core {
 	public $API_ADDRESS;
 	public $API_KEY;
 	public $API_PROTOCOL;
+    public $AUTH_ORIGIN;
 	public $DAEMONIZATION;
 	public $WORKER_COUNT;
 	public $SSL_CERT;
@@ -79,6 +80,7 @@ class Core {
 		$this->SSL_VERIFY_PEER = $EnvBoot->get_var("ssl_verify_peer");
 		$this->SSL_ALLOW_SELF_SIGNED = $EnvBoot->get_var("ssl_allow_self_signed");
 		$this->API_AUTH_ADDRESS = $EnvBoot->get_var("api_auth_address");
+        $this->AUTH_ORIGIN = $EnvBoot->get_var("auth_origin");
 		$this->SECRET = $EnvBoot->get_var("secret");
         $this->RUN_TYPE = $EnvBoot->get_var("run_type");
 
@@ -240,9 +242,19 @@ class Core {
 			$query = "DELETE FROM random_str_store WHERE FD = :fd";
 
 			$db->make_query("delete", $query, $vals_array);
-			$resp = $this->get_user_api_key($data['user_id']);
+            switch ($this->AUTH_ORIGIN) {
+                case "api":
+                    $resp = $this->get_user_api_key($data['user_id']);
+                    break;
+                case "mysql":
+                    $resp = $this->get_user_token_mysql($data['user_id']);
+                    break;
+                case "sqlite":
+                default:
+                    $resp = $this->get_user_token_sqlite($data['user_id'], $db);
+            }
 
-			$this->add_connection($fd, $resp['data']['api_token'], $db);
+			$this->add_connection($fd, $resp, $db);
 		}
 		else {
             $logger = new Utils\Logging_system();
@@ -273,15 +285,16 @@ class Core {
         }
 	}
 
-    private function run_middleware($data, $fd, $server, $routing) {
+    private function run_middleware($data, $fd, $server, $routing, $db) {
         $grouping = new Middleware\Middleware_Manager();
-        return $grouping->run($data, $fd, $server, $this->RUN_TYPE, $routing);
+        return $grouping->run($data, $fd, $server, $this->RUN_TYPE, $routing, $db);
     }
 
     private function handle_normal_routing($data, $fd, $server) {
         if(array_key_exists($data['message_type'], $this->ROUTES)) {
             $routing = $this->ROUTES[$data['message_type']];
-            $middleware_resp = $this->run_middleware($data, $fd, $server, $routing);
+            $db = new Utils\Sqlite_Handler();
+            $middleware_resp = $this->run_middleware($data, $fd, $server, $routing, $db);
             if(is_array($middleware_resp) && array_key_exists('data', $middleware_resp)) {
                 $data = $middleware_resp['data'];
                 $middleware_run = $middleware_resp['status'];
@@ -289,12 +302,8 @@ class Core {
             else {
                 $middleware_run = $middleware_resp;
             }
-            $db = new Utils\Sqlite_Handler();
+
             if($middleware_run) {
-                if ($routing['protected']) {
-                    $auth = new Utils\Authentication_System();
-                    $auth->authenticate($fd, $data['user_id'], $data['auth'], $data['data'], $server, $db);
-                }
                 include_once("Handlers/" . $routing['class'] . ".php");
                 $loaded_class = $routing['class'];
                 $method = $routing['method'];
@@ -326,7 +335,35 @@ class Core {
         $db = null;
     }
 
-	protected function get_user_api_key($user_id) {
+    private function get_user_token_sqlite($user_id, $db) {
+        $query = "SELECT api_token FROM user_tokens WHERE user_id = :user_id";
+        $vals_array = [
+            [
+                "name" => ":user_id",
+                "value" => $user_id,
+                "type" => "i"
+            ]
+        ];
+        $resp = $db->make_query("select", $query, $vals_array);
+        return $resp[0]['api_token'];
+    }
+
+    private function get_user_token_mysql($user_id) {
+        $db = new Utils\Mysql_Handler($this->RUN_TYPE);
+        $query = "SELECT api_token FROM user_tokens WHERE user_id = :user_id";
+        $vals_array = [
+            [
+                "name" => ":user_id",
+                "value" => $user_id,
+                "type" => "i"
+            ]
+        ];
+        $resp = $db->make_query("select", $query, $vals_array);
+        $db = null;
+        return $resp[0]['api_token'];
+    }
+
+	private function get_user_api_key($user_id) {
 		$url = $this->API_PROTOCOL . '://' . $this->API_ADDRESS . '/' . $this->API_AUTH_ADDRESS;
 		$data = [
 			"user_id" => $user_id,
@@ -351,7 +388,8 @@ class Core {
 		];
 		$context = stream_context_create($options);
 		$result = file_get_contents($url, false, $context);
-		return json_decode($result, true);
+		$out = json_decode($result, true);
+        return $out['data']['api_token'];
 	}
 
 	private function add_connection($fd, $token, $db) {

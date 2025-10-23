@@ -20,8 +20,8 @@ class EnvBootstrap
 	private $ssl_allow_self_signed;
     private $api_auth_address;
     private $auth_check_address;
+    private $authorization_address;
     private $auth_origin;
-    private $api_user_id;
     private $api_version;
 	private $secret;
     private $db_host;
@@ -74,8 +74,8 @@ class EnvBootstrap
 		$this->ssl_allow_self_signed = $_ENV["SSL_ALLOW_SELF_SIGNED"];
 		$this->api_auth_address = $_ENV["API_AUTH_ADDRESS"];
         $this->auth_check_address = $_ENV["AUTH_CHECK_ADDRESS"];
+        $this->authorization_address = $_ENV["AUTHORIZATION_ADDRESS"];
         $this->auth_origin = $_ENV["AUTH_ORIGIN"];
-        $this->api_user_id = $_ENV["API_USER_ID"];
         $this->api_version = $_ENV["API_VERSION"];
 		$this->secret = $_ENV["SECRET"];
         $this->mysql_run = $_ENV["MYSQL_RUN"];

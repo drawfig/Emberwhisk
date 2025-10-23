@@ -12,7 +12,7 @@ spl_autoload_register(function ($class_name) {
 });
 
 class Authenticate_User {
-    private $AUTH_ORIGIN = "default";
+    private $AUTH_ORIGIN;
     private $AUTH_ADDRESS;
     private $RUN_TYPE;
     private $API_KEY;
@@ -42,8 +42,9 @@ class Authenticate_User {
                 return true;
             }
             return ["status" => false, "data" => [
-                "status" => 403,
-                "message" => "Error: Forbidden",
+                "status" => 401,
+                "message" => "Error: Unauthorized",
+                "kill_connection" => false,
             ]];
         }
         else {
@@ -77,7 +78,6 @@ class Authenticate_User {
             ]
         ];
         $resp = $db->make_query("select", $query, $val_array);
-        $db = null;
 
         return $this->hash_check($resp, $data);
     }

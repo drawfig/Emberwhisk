@@ -5,6 +5,8 @@ class Middleware_Software_Groups {
     public $GLOBAL_MIDDLEWARE = [
         "Rate_Limiter",
         "User_Filter",
+        "Format_Check",
+        "Authenticate_User",
     ];
 
     public $REGIONAL_MIDDLEWARE = [

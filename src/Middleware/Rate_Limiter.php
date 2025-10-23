@@ -21,14 +21,18 @@ class Rate_Limiter {
         $this->RATE_LIMIT = $ENV_BOOTSTRAP->get_var("rate_limit");
     }
 
-    public function run($data, $server, $fd, $routing) {
+    public function run($data, $server, $db, $routing, $fd) {
         $out_chk = $this->check_rate($data, $server, $fd);
         if($out_chk) {
             return true;
         }
         else {
             $this->log_rejection($fd);
-            return false;
+            return ["status" => false, "data" => [
+                "status" => 429,
+                "message" => "Error: Too Many Requests",
+                "kill_connection" => true,
+            ]];
         }
     }
 
