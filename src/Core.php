@@ -275,10 +275,44 @@ class Core {
 	protected function message_routing($data, $fd, $server) {
         switch ($data['message_type']) {
             case "init_handshake":
-                $this->send_handshake($server, $fd);
+                $db = new Utils\Sqlite_Handler();
+                $middleware_resp = $this->run_middleware($data, $fd, $server, [], $db);
+                if(is_array($middleware_resp) && array_key_exists('data', $middleware_resp)) {
+                    $data = $middleware_resp['data'];
+                    $middleware_run = $middleware_resp['status'];
+                }
+                else {
+                    $middleware_run = $middleware_resp;
+                }
+                if($middleware_run) {
+                    $this->send_handshake($server, $fd);
+                }
+                else {
+                    include_once("Handlers/middleware_rejection_handler.php");
+                    $handler = new middleware_rejection_handler($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
+                    $handler->run();
+                }
+                $db = null;
                 break;
             case "handshake":
-                $this->handle_handshake_resp($data['data'], $fd);
+                $db = new Utils\Sqlite_Handler();
+                $middleware_resp = $this->run_middleware($data, $fd, $server, [], $db);
+                if(is_array($middleware_resp) && array_key_exists('data', $middleware_resp)) {
+                    $data = $middleware_resp['data'];
+                    $middleware_run = $middleware_resp['status'];
+                }
+                else {
+                    $middleware_run = $middleware_resp;
+                }
+                if($middleware_run) {
+                    $this->handle_handshake_resp($data['data'], $fd);
+                }
+                else {
+                    include_once("Handlers/middleware_rejection_handler.php");
+                    $handler = new middleware_rejection_handler($this->SECRET, $data, $fd, $server, $db, $this->RUN_TYPE);
+                    $handler->run();
+                }
+                $db = null;
                 break;
             default:
                 $this->handle_normal_routing($data, $fd, $server);
