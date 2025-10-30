@@ -11,10 +11,10 @@ spl_autoload_register(function ($class_name) {
     include ($class_name . ".php");
 });
 class Middleware_Manager {
-    public function run($data, $fd, $server, $run_type) {
+    public function run($data, $fd, $server, $run_type, $routing, $db) {
         $region_middleware_list = $this->get_region_middleware($data['message_type'], $server, $fd);
         $local_middleware_list = $this->ready_run_list_from_local($data['message_type']);
-        return $this->run_middleware($data, $server, $fd, $this->compile_final_middleware_list($region_middleware_list, $local_middleware_list, $data['message_type']), $run_type);
+        return $this->run_middleware($data, $server, $fd, $this->compile_final_middleware_list($region_middleware_list, $local_middleware_list, $data['message_type']), $run_type, $routing, $db);
     }
 
     private function compile_final_middleware_list($region_middleware_list, $local_middleware_list, $route) {
@@ -111,16 +111,20 @@ class Middleware_Manager {
         return $output;
     }
 
-    private function run_middleware($data, $server, $fd, $middleware_list, $run_type) {
+    private function run_middleware($data, $server, $fd, $middleware_list, $run_type, $routing, $db) {
         foreach ($middleware_list as $middleware) {
             $middleware_class = "\\Middleware\\{$middleware}";
             $middleware_instance = new $middleware_class($run_type);
-            $check = $middleware_instance->run($data, $server, $fd);
-            if($check === false) {
+            $check = $middleware_instance->run($data, $server, $db, $routing, $fd);
+            if(is_array($check) && array_key_exists('data', $check)) {
+                $data = $check['data'];
+            }
+
+            if((!$check) || (!is_array($check) && !$check['status'])) {
                 return false;
             }
         }
-        return true;
+        return ["status" => true, "data" => $data];
     }
 
 }

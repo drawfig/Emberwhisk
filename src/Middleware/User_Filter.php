@@ -26,7 +26,7 @@ class User_Filter
         $ENV_BOOTSTRAP = new \Utils\EnvBootstrap($run_type);
     }
 
-    public function run($data, $server, $fd)
+    public function run($data, $server, $db, $routing, $fd)
     {
         $user_ip = $server->getClientInfo($fd)['remote_ip'];
         $whitelist_used = $this->check_for_white_list($data['message_type']);
@@ -36,13 +36,21 @@ class User_Filter
                 return true;
             }
             else {
-                return false;
+                return ["status" => false, "data" => [
+                    "status" => 403,
+                    "message" => "Error: Forbidden",
+                    "kill_connection" => true,
+                ]];
             }
         }
         else {
             $blacklist_output = $this->search_blacklist($user_ip);
             if(sizeof($blacklist_output) > 0) {
-                return false;
+                return ["status" => false, "data" => [
+                    "status" => 403,
+                    "message" => "Error: Forbidden",
+                    "kill_connection" => true,
+                ]];
             }
             else {
                 return true;
