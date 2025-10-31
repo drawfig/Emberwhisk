@@ -121,7 +121,7 @@ class Middleware_Manager {
             }
 
             if((!$check) || (is_array($check) && !$check['status'])) {
-                return false;
+                return $check;
             }
         }
         return ["status" => true, "data" => $data];
