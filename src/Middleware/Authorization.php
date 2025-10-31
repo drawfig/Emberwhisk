@@ -21,7 +21,7 @@ class Authorization {
     private $AUTHORIZATION_ADDRESS;
     public function __construct($run_type) {
         $this->RUN_TYPE = $run_type;
-        $env_boot = new Utils\EnvBoostrap($run_type);
+        $env_boot = new \Utils\EnvBootstrap($run_type);
         $this->AUTH_ORIGIN = $env_boot->get_var("auth_origin");
         $this->AUTHORIZATION_ADDRESS = $env_boot->get_var("authorization_address");
     }

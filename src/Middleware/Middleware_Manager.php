@@ -120,7 +120,7 @@ class Middleware_Manager {
                 $data = $check['data'];
             }
 
-            if((!$check) || (!is_array($check) && !$check['status'])) {
+            if((!$check) || (is_array($check) && !$check['status'])) {
                 return false;
             }
         }
