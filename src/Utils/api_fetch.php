@@ -9,18 +9,25 @@ class api_fetch
 {
 	private $PAYLOAD;
 	private $API_KEY;
+    private $SECRET;
 	private $API_PROTOCOL;
 	private $API_ADDRESS;
     private $API_VERSION;
 
-	public function __construct($data, $action, $environment) {
+	public function __construct($data, $action, $environment, $use_user_auth = true) {
 		$this->property_setter($environment);
+        if($use_user_auth) {
+            $auth = $data['auth'];
+        }
+        else{
+            $auth = $this->api_auth_gen($data);
+        }
 		$this->PAYLOAD = [
 			'user_id' => $data["user_id"],
 			'api_version' => $this->API_VERSION,
 			'action' => $action,
 			'data' => $data,
-			'auth' => $data["auth"]
+			'auth' => $auth
 		];
 	}
 
@@ -30,10 +37,11 @@ class api_fetch
 		$this->API_PROTOCOL = $prop_get->get_var("api_protocol");
 		$this->API_ADDRESS = $prop_get->get_var("api_address");
         $this->API_VERSION = $prop_get->get_var("api_version");
+        $this->SECRET = $prop_get->get_var("secret");
 	}
 
-	private function api_auth_gen($data, $auth) {
-		return hash('sha256', $this->API_KEY . json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
+	private function api_auth_gen($data) {
+		return hash('sha256', $this->SECRET . json_encode($data, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE));
 	}
 
 	public function send($route) {

@@ -42,6 +42,8 @@ class Core {
 	public $SSL_ALLOW_SELF_SIGNED;
 	public $SECRET;
 
+    public $API_VERSION;
+
     public $API_AUTH_ADDRESS;
 
     public $ROUTES;
@@ -83,6 +85,7 @@ class Core {
         $this->AUTH_ORIGIN = $EnvBoot->get_var("auth_origin");
 		$this->SECRET = $EnvBoot->get_var("secret");
         $this->RUN_TYPE = $EnvBoot->get_var("run_type");
+        $this->API_VERSION = $EnvBoot->get_var("api_version");
 
         $this->init_routes();
 	}
@@ -405,7 +408,7 @@ class Core {
 
 		$payload =[
 			"user_id" => 0,
-			'api_version' => "25.07.19",
+			'api_version' => $this->API_VERSION,
 			'action' => "socket_user_api_key_request",
 			'data' => $data,
 			'auth' => $this->api_auth_gen($data),
