@@ -83,7 +83,7 @@ class Authenticate_User {
     }
 
     private function api_authentication($data, $fd) {
-        $fetch = new Utils\api_fetch($data, "authenticate_user", $this->RUN_TYPE);
+        $fetch = new \Utils\api_fetch($data, "authenticate_user", $this->RUN_TYPE);
         $resp = $fetch->send($this->AUTH_ADDRESS);
         if(hash('sha256', $this->API_KEY . json_encode($resp['data'],  JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)) === $resp['auth']) {
             return $this->hash_check($resp['data'], $data);
